@@ -27,18 +27,19 @@ int main(){
     if(sockfd < 0) printf("Socket Create Error\n");
     struct sockaddr_in info;
     struct sockaddr_in client_info;
-    socklen_t client_addr_len;
+    socklen_t client_addr_len = sizeof(struct sockaddr_in);
     info.sin_family = AF_INET;
     info.sin_addr.s_addr = INADDR_ANY; // Local IP Address
     info.sin_port = htons(8000); // Port 8080
 
     int bind_result = bind(sockfd, (struct sockaddr*)&info, sizeof(info));
     if(bind_result < 0) printf("Bind Error\n");
-
-    listen(sockfd,3); // block until listen a client
     fd_set allset;
     FD_ZERO(&allset);
     FD_SET(sockfd, &allset);
+    int MAX_FD = 3;
+    max(sockfd+1, MAX_FD);
+    listen(sockfd,3); // block until listen a client
     int client_fd;
     vector<int> clientset;
     int id=0;
@@ -50,11 +51,12 @@ int main(){
         timeval timeout;
         timeout.tv_sec = 3;
         timeout.tv_usec = 0;
-        select(10, &workset, NULL, NULL, &timeout);
-        if(FD_ISSET(sockfd, &workset) == 0){
+        select(MAX_FD, &workset, NULL, NULL, &timeout);
+        if(FD_ISSET(sockfd, &workset) != 0){
             client_fd = accept(sockfd, (struct sockaddr*)&client_info, &client_addr_len);
             printf("Accept client, client port: %d\n", client_info.sin_port);
             FD_SET(client_fd, &allset);
+            MAX_FD = max(client_fd+1, MAX_FD);
             clientset.push_back(client_fd);
             char* clientno = new char(100);
             sprintf(clientno, "%d", id);

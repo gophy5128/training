@@ -51,7 +51,7 @@ int customer(int socketfd, int clientno){
 
 int main(){
     int socketfd = socket(AF_INET, SOCK_STREAM, 0);
-    if(socketfd < 0) printf("Socket Create Error\n");
+    if(socketfd != 0) printf("Socket Create Error\n");
     struct sockaddr_in info;
     info.sin_family = AF_INET;
     info.sin_addr.s_addr = inet_addr("127.0.0.1"); // Local IP Address
